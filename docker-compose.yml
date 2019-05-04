@@ -1,0 +1,58 @@
+version: '3.5'
+services:
+#    redis:
+#        image: redis
+#        ports:
+#            - 6379
+#    elasticsearch:
+#        image: elasticsearch:6.7.0
+#        ports:
+#            - 9200
+    nginx:
+        image: vothanhphong/nginx
+        ports:
+            - 80:80
+            - 443:443
+        environment:
+            - NGINX_CONFIG=''
+            - SERVER_NAME=dashboard.io
+            - PHP_SERVICE=php
+            - PHP_PORT=9000
+            - ROOT_FOLDER=/project
+            - IS_HTTPS=false
+            - IS_MAGENTO=false
+            - IS_MAGENTO_MULTI=false
+            - MAGENTO_MODE=''
+            - MAGENTO_RUN_TYPE=''
+            - MAGENTO_MULTI_SITES=''
+        volumes:
+            - ./docker/logs/nginx:/var/log/nginx/
+            - .:/project:rw
+        depends_on:
+            - php
+    php:
+        image: vothanhphong/fpm:7.2
+        ports:
+            - 9000
+        environment:
+            - IS_ACTIVE_XDEBUG=true
+            - ENABLE_SENDMAIL=true
+            - CONFIG=
+                date.timezone=Asia/Ho_Chi_Minh
+        volumes:
+            - .:/project:rw
+        depends_on:
+            - mariadb
+#            - redis
+#            - elasticsearch
+    mariadb:
+        image: mariadb
+        ports:
+            - 3306:3306
+        environment:
+            - MYSQL_DATABASE=local
+            - MYSQL_USER=local
+            - MYSQL_PASSWORD=local
+            - MYSQL_ROOT_PASSWORD=local
+        volumes:
+            - ./docker/dbdata:/var/lib/mysql
